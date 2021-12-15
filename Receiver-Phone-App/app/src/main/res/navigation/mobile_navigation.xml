@@ -3,23 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_view_camera">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.webrtcdemo.receiver.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/navigation_view_camera"
+        android:name="com.webrtcdemo.receiver.ui.viewcamera.ViewCameraFragment"
+        android:label="@string/title_view_camera"
+        tools:layout="@layout/view_camera_fragment" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.webrtcdemo.receiver.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
-
-    <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.webrtcdemo.receiver.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_register_camera"
+        android:name="com.webrtcdemo.receiver.ui.registercamera.RegisterCameraFragment"
+        android:label="@string/title_register_camera"
+        tools:layout="@layout/register_camera_fragment" />
 </navigation>
