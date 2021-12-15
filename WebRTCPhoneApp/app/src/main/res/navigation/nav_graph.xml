@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_view_camera">
+
+    <fragment
+        android:id="@+id/navigation_view_camera"
+        android:name="com.webrtcdemo.webrtc_phone_app.view.ViewCameraFragment"
+        android:label="@string/title_view_camera"
+        tools:layout="@layout/view_camera_fragment" />
+
+    <fragment
+        android:id="@+id/navigation_register_camera"
+        android:name="com.webrtcdemo.webrtc_phone_app.view.RegisterCameraFragment"
+        android:label="@string/title_register_camera"
+        tools:layout="@layout/register_camera_fragment" />
+</navigation>

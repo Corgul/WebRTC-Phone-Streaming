@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">WebRTC-Phone-App</string>
+    <string name="title_view_camera">View Camera</string>
+    <string name="title_register_camera">Register Camera</string>
+</resources>

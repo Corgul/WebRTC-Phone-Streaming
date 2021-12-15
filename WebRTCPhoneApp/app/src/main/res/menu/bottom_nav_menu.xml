@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_view_camera"
+        android:icon="@drawable/ic_photo_camera_24"
+        android:title="@string/title_view_camera" />
+
+    <item
+        android:id="@+id/navigation_register_camera"
+        android:icon="@drawable/ic_linked_camera_24"
+        android:title="@string/title_register_camera" />
+
+</menu>
