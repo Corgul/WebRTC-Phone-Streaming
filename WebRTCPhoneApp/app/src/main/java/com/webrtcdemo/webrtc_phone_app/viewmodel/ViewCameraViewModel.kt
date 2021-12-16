@@ -9,7 +9,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ViewCameraViewModel @Inject constructor() : ViewModel() {
     private val _text = MutableLiveData<String>().apply {
-        value = "This is the fragment"
+        value = "View Camera Stream"
     }
     val text: LiveData<String> = _text
 }
