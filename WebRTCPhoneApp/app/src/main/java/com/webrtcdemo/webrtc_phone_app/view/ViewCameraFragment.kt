@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.webrtcdemo.webrtc_phone_app.databinding.ViewCameraFragmentBinding
@@ -23,11 +22,8 @@ class ViewCameraFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = ViewCameraFragmentBinding.inflate(inflater, container, false)
-
-        val textView: TextView = binding.textHome
-        viewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.viewModel = viewModel
         return binding.root
     }
 }

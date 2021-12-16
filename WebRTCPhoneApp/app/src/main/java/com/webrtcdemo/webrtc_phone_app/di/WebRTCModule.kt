@@ -1,33 +1,25 @@
 package com.webrtcdemo.webrtc_phone_app.di
 
-import com.webrtcdemo.webrtc_phone_app.signaling.SignalingClient
 import com.webrtcdemo.webrtc_phone_app.webrtc.*
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import javax.inject.Qualifier
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class WebRTCStreamSenderListener
 
 @InstallIn(ViewModelComponent::class)
 @Module
-class WebRTCModule {
-    @Provides
-    fun providePeerConnectionClient(): PeerConnectionClient {
-        return PeerConnectionClientImpl()
-    }
+abstract class WebRTCModule {
+    @Binds
+    abstract fun providePeerConnectionClient(peerConnectionClientImpl: PeerConnectionClientImpl): PeerConnectionClient
 
-    @Provides
-    fun provideWebRTCStreamReceiver(
-        signalingClient: SignalingClient,
-        peerConnectionClient: PeerConnectionClient
-    ): WebRTCStreamReceiver {
-        return WebRTCStreamReceiverImpl(signalingClient, peerConnectionClient)
-    }
+    @Binds
+    abstract fun provideWebRTCStreamReceiver(webRTCStreamReceiverImpl: WebRTCStreamReceiverImpl): WebRTCStreamReceiver
 
-    @Provides
-    fun provideWebRTCStreamSender(
-        signalingClient: SignalingClient,
-        peerConnectionClient: PeerConnectionClient
-    ) : WebRTCStreamSender {
-        return WebRTCStreamSenderImpl(signalingClient, peerConnectionClient)
-    }
+    @Binds
+    abstract fun provideWebRTCStreamSender(webRTCStreamSenderImpl: WebRTCStreamSenderImpl): WebRTCStreamSender
 }

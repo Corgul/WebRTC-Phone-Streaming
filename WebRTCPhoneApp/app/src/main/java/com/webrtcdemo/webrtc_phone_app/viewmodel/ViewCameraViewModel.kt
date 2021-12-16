@@ -1,15 +1,23 @@
 package com.webrtcdemo.webrtc_phone_app.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.webrtcdemo.webrtc_phone_app.WebRTCAppLogger
+import com.webrtcdemo.webrtc_phone_app.webrtc.WebRTCStreamReceiver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class ViewCameraViewModel @Inject constructor() : ViewModel() {
-    private val _text = MutableLiveData<String>().apply {
-        value = "View Camera Stream"
+class ViewCameraViewModel @Inject constructor(
+    private val webRTCStreamReceiver: WebRTCStreamReceiver
+) : ViewModel() {
+    val roomName = MutableLiveData<String>()
+
+    fun onJoinRoomClicked() {
+        val room = roomName.value
+        if (room.isNullOrEmpty()) {
+            return
+        }
+        WebRTCAppLogger.d("Join room clicked + $room")
     }
-    val text: LiveData<String> = _text
 }

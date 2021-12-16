@@ -9,4 +9,7 @@ class WebRTCStreamReceiverImpl @Inject constructor(
     signalingClient: SignalingClient,
     peerConnectionClient: PeerConnectionClient
 ) : WebRTCStreamReceiver {
+    override fun connectToRoom(roomName: String) {
+
+    }
 }
