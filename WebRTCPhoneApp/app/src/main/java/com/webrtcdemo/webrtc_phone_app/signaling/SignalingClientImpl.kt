@@ -13,10 +13,23 @@ import java.util.Arrays
 
 import android.util.Log
 import com.webrtcdemo.webrtc_phone_app.WebRTCAppLogger
+import com.webrtcdemo.webrtc_phone_app.webrtc.SocketRoomEvent
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import javax.inject.Inject
+import io.socket.emitter.Emitter
+
+import io.socket.engineio.client.Transport
+
+import io.socket.client.Manager
+
+
+
 
 
 @Singleton
-class SignalingClientImpl : SignalingClient {
+class SignalingClientImpl @Inject constructor() : SignalingClient {
+    private val roomEvents = MutableStateFlow<SocketRoomEvent?>(null)
     private val socket: Socket
 
     // Should not be in production
@@ -37,14 +50,15 @@ class SignalingClientImpl : SignalingClient {
     init {
         val sslContext = SSLContext.getInstance("TLS")
         sslContext.init(null, trustAllCerts, null)
-        IO.setDefaultHostnameVerifier() { _: String, _: SSLSession ->
-            true
-        }
-        IO.setDefaultSSLContext(sslContext)
-        socket = IO.socket("http:127.0.0.1:8080")
+//        IO.setDefaultHostnameVerifier() { _: String, _: SSLSession ->
+//            true
+//        }
+//        IO.setDefaultSSLContext(sslContext)
+        socket = IO.socket("http://192.168.0.162:8080")
     }
 
     override fun connect(roomName: String) {
+        roomEvents.value = SocketRoomEvent.CONNECTING
         socket.connect()
         if (roomName.isNotEmpty()) {
             socket.emit(CREATE_OR_JOIN, roomName)
@@ -54,11 +68,38 @@ class SignalingClientImpl : SignalingClient {
     }
 
     private fun setupCallbacks() {
+        socket.on(Socket.EVENT_DISCONNECT) {
+            WebRTCAppLogger.d("Disconnected ${it.contentToString()}")
+        }
+        socket.on(Manager.EVENT_ERROR) {
+            WebRTCAppLogger.d("error")
+        }
         // log event
         socket.on("log") { args: Array<Any> ->
             WebRTCAppLogger.d("log call() called with: args = [" + args.contentToString() + "]")
         }
+        socket.on("created") {
+            WebRTCAppLogger.d("onRoomEvent2 created, ${it.contentToString()}")
+            roomEvents.value = SocketRoomEvent.CREATED_ROOM
+        }
+        socket.on("joined") {
+            WebRTCAppLogger.d("onRoomEvent2 joined, ${it.contentToString()}")
+            roomEvents.value = SocketRoomEvent.JOINED_EXISTING_ROOM
+        }
+        socket.on("join") {
+            WebRTCAppLogger.d("onRoomEvent2 join, ${it.contentToString()}")
+            roomEvents.value = SocketRoomEvent.PEER_JOINED_ROOM
+        }
+        socket.on("full") {
+            WebRTCAppLogger.d("onRoomEvent2 full, ${it.contentToString()}")
+            roomEvents.value = SocketRoomEvent.ROOM_IS_FULL
+        }
+        socket.on("ready") {
+            WebRTCAppLogger.d("onRoomEvent2 ready, ${it.contentToString()}")
+        }
     }
+
+    override fun getSocketRoomEventFlow(): Flow<SocketRoomEvent?> = roomEvents
 
     companion object {
         const val CREATE_OR_JOIN = "create or join"

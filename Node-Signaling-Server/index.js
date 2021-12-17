@@ -9,7 +9,7 @@ var app = http
   .createServer((req, res) => {
     fileServer.serve(req, res);
   })
-  .listen(8080);
+  .listen(8080, "0.0.0.0");
 
 // Setup Socket
 var socketIO = require("socket.io")(app);
@@ -30,10 +30,8 @@ io.sockets.on("connection", (socket) => {
   socket.on("create or join", (room) => {
     log("Received request to create or join room " + room);
 
-    var clientsInRoom = io.sockets.adapter.rooms[room];
-    var numClients = clientsInRoom
-      ? Object.keys(clientsInRoom.sockets).length
-      : 0;
+    var clientsInRoom = io.sockets.adapter.rooms.get(room);
+    var numClients = clientsInRoom ? clientsInRoom.size : 0;
 
     log("Room " + room + " now has " + numClients + " client(s)");
 
@@ -43,10 +41,10 @@ io.sockets.on("connection", (socket) => {
       socket.emit("created", room, socket.id);
     } else if (numClients === 1) {
       log("Client ID " + socket.id + " joined room " + room);
-      io.sockets.in(room).emit("join", room);
+      socket.to(room).emit("join", room);
       socket.join(room);
       socket.emit("joined", room, socket.id);
-      io.sockets.in(room).emit("ready");
+      io.in(room).emit("ready");
     } else {
       // max two clients
       socket.emit("full", room);
