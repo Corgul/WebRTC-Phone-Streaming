@@ -4,7 +4,7 @@ var http = require("http");
 var fs = require("fs");
 
 var fileServer = new nodeStatic.Server();
-const port = process.env.PORT || '5000';
+const port = process.env.PORT || "5000";
 // Setup HTTP server
 var app = http
   .createServer((req, res) => {

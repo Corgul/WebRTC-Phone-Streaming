@@ -18,7 +18,7 @@ import org.webrtc.IceCandidate
 class SignalingClientImpl @Inject constructor() : SignalingClient {
     private val roomEvents = MutableStateFlow<SocketRoomConnectionEvents?>(null)
     private val messageEvents = MutableStateFlow<SocketMessageEvents?>(null)
-    private val socket: Socket = IO.socket("http://192.168.0.162:8080")
+    private val socket: Socket = IO.socket("http://webrtc-demo-signaling-server.herokuapp.com/")
     private lateinit var roomName: String
 
     override fun connect(roomName: String) {
