@@ -1,20 +1,49 @@
 package com.webrtcdemo.webrtc_phone_app.di
 
+import android.content.Context
+import com.webrtcdemo.webrtc_phone_app.signaling.SignalingClient
 import com.webrtcdemo.webrtc_phone_app.webrtc.*
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import javax.inject.Qualifier
+
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class WebRTCStreamReceiverQualifier
+
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class WebRTCStreamSenderQualifier
 
 @InstallIn(ViewModelComponent::class)
 @Module
-abstract class WebRTCModule {
-    @Binds
-    abstract fun providePeerConnectionClient(peerConnectionClientImpl: PeerConnectionClientImpl): PeerConnectionClient
+object WebRTCModule {
+    @Provides
+    fun providePeerConnectionClient(@ApplicationContext context: Context): PeerConnectionClient {
+        return PeerConnectionClientImpl(context)
+    }
 
-    @Binds
-    abstract fun provideWebRTCStreamReceiver(webRTCStreamReceiverImpl: WebRTCStreamReceiverImpl): WebRTCStreamReceiver
+    @Provides
+    @WebRTCStreamReceiverQualifier
+    fun provideWebRTCStreamReceiver(
+        signalingClient: SignalingClient,
+        peerConnectionClient: PeerConnectionClient,
+        @ViewModelCoroutineScope coroutineScope: CoroutineScope
+    ): BaseWebRTCStream {
+        return WebRTCStreamReceiver(signalingClient, peerConnectionClient, coroutineScope)
+    }
 
-    @Binds
-    abstract fun provideWebRTCStreamSender(webRTCStreamSenderImpl: WebRTCStreamSenderImpl): WebRTCStreamSender
+    @Provides
+    @WebRTCStreamSenderQualifier
+    fun provideWebRTCStreamSender(
+        signalingClient: SignalingClient,
+        peerConnectionClient: PeerConnectionClient,
+        @ViewModelCoroutineScope coroutineScope: CoroutineScope
+    ): BaseWebRTCStream {
+        return WebRTCStreamSender(signalingClient, peerConnectionClient, coroutineScope)
+    }
 }

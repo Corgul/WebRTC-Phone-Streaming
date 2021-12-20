@@ -41,7 +41,7 @@ io.sockets.on("connection", (socket) => {
       socket.emit("created", room, socket.id);
     } else if (numClients === 1) {
       log("Client ID " + socket.id + " joined room " + room);
-      socket.to(room).emit("join", room);
+      socket.to(room).emit("peer joined", room);
       socket.join(room);
       socket.emit("joined", room, socket.id);
       io.in(room).emit("ready");

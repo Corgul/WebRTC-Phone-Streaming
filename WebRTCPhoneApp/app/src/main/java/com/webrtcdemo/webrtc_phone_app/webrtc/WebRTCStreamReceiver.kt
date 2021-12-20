@@ -1,15 +1,31 @@
 package com.webrtcdemo.webrtc_phone_app.webrtc
 
-import kotlinx.coroutines.flow.Flow
+import com.webrtcdemo.webrtc_phone_app.signaling.SignalingClient
+import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.CoroutineScope
+import javax.inject.Inject
 
-interface WebRTCStreamReceiver {
-    /**
-     * Connects to the signaling server room
-     * @param roomName the specific room to connect to
-     */
-    fun connectToRoom(roomName: String)
+@ViewModelScoped
+class WebRTCStreamReceiver @Inject constructor(
+    private val signalingClient: SignalingClient,
+    private val peerConnectionClient: PeerConnectionClient,
+    private val viewModelScope: CoroutineScope
+) : BaseBaseWebRTCStreamImpl(signalingClient, peerConnectionClient, viewModelScope) {
 
-    fun getRoomEventFlow(): Flow<SocketRoomEvent?>
+    override fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents?) {
+        if (event == null) {
+            return
+        }
+        when (event) {
+            SocketRoomConnectionEvents.PEER_JOINED_ROOM -> initiatePeerConnection()
+            SocketRoomConnectionEvents.JOINED_EXISTING_ROOM -> initiatePeerConnection()
+            // TODO Add disconnect logic
+        }
+    }
 
-    fun getStreamEventsFlow(): Flow<StreamEvent?>
+    // Move this work off of the main thread
+    private fun initiatePeerConnection() {
+        peerConnectionClient.setupPeerConnection(EglBaseWrapper.eglBase)
+        peerConnectionClient.createOffer()
+    }
 }
