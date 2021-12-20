@@ -17,7 +17,7 @@ abstract class BaseWebRTCStreamImpl(
     private val peerConnectionClient: PeerConnectionClient,
     private val viewModelScope: CoroutineScope
 ) : BaseWebRTCStream {
-    private var streamEvents = MutableStateFlow(StreamEvent.NOT_STARTED)
+    protected var streamEvents = MutableStateFlow(StreamEvent.NOT_STARTED)
 
     init {
         viewModelScope.launch {

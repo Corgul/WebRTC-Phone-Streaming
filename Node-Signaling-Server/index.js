@@ -4,12 +4,13 @@ var http = require("http");
 var fs = require("fs");
 
 var fileServer = new nodeStatic.Server();
+const port = process.env.PORT || '5000';
 // Setup HTTP server
 var app = http
   .createServer((req, res) => {
     fileServer.serve(req, res);
   })
-  .listen(8080, "0.0.0.0");
+  .listen(port);
 
 // Setup Socket
 var socketIO = require("socket.io")(app);

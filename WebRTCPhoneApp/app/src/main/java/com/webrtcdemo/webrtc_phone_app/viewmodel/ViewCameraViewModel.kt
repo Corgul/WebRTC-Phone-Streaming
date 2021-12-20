@@ -45,6 +45,7 @@ class ViewCameraViewModel @Inject constructor(
         }
         when (socketRoomConnectionEvent) {
             SocketRoomConnectionEvents.CONNECTING -> connectingToRoom()
+            SocketRoomConnectionEvents.CONNECTED -> connectedToRoom()
             SocketRoomConnectionEvents.CREATED_ROOM -> createdRoom()
             SocketRoomConnectionEvents.JOINED_EXISTING_ROOM -> joinedExistingRoom()
             SocketRoomConnectionEvents.PEER_JOINED_ROOM -> peerJoinedExistingRoom()
@@ -54,6 +55,10 @@ class ViewCameraViewModel @Inject constructor(
 
     private fun connectingToRoom() {
         loadingText.value = "Connecting to the room"
+    }
+
+    private fun connectedToRoom() {
+        loadingText.value = "Connected to the room"
     }
 
     private fun createdRoom() {
