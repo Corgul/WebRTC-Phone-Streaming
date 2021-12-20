@@ -12,12 +12,12 @@ import org.webrtc.VideoSink
 import javax.inject.Inject
 
 @ViewModelScoped
-abstract class BaseBaseWebRTCStreamImpl @Inject constructor(
+abstract class BaseWebRTCStreamImpl(
     private val signalingClient: SignalingClient,
     private val peerConnectionClient: PeerConnectionClient,
     private val viewModelScope: CoroutineScope
 ) : BaseWebRTCStream {
-    private val streamEvents = MutableStateFlow(StreamEvent.NOT_STARTED)
+    private var streamEvents = MutableStateFlow(StreamEvent.NOT_STARTED)
 
     init {
         viewModelScope.launch {

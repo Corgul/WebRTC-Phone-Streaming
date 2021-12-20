@@ -15,7 +15,7 @@ import org.webrtc.VideoSink
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ViewCameraFragment @Inject constructor() : Fragment(), SurfaceHolder.Callback {
+class ViewCameraFragment : Fragment(), SurfaceHolder.Callback {
 
     private val viewModel: ViewCameraViewModel by viewModels()
     private lateinit var binding: ViewCameraFragmentBinding

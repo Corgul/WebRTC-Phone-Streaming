@@ -10,7 +10,7 @@ class WebRTCStreamSender @Inject constructor(
     private val signalingClient: SignalingClient,
     private val peerConnectionClient: PeerConnectionClient,
     private val viewModelScope: CoroutineScope
-) : BaseBaseWebRTCStreamImpl(signalingClient, peerConnectionClient, viewModelScope) {
+) : BaseWebRTCStreamImpl(signalingClient, peerConnectionClient, viewModelScope) {
     override fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents?) {
         // TODO Implement later
     }
