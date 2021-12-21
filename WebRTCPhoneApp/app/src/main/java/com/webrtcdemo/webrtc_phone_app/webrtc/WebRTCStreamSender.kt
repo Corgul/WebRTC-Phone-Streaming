@@ -12,6 +12,19 @@ class WebRTCStreamSender @Inject constructor(
     private val viewModelScope: CoroutineScope
 ) : BaseWebRTCStreamImpl(signalingClient, peerConnectionClient, viewModelScope) {
     override fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents?) {
-        // TODO Implement later
+        if (event == null) {
+            return
+        }
+        when (event) {
+            SocketRoomConnectionEvents.CONNECTING -> streamEvents.value = StreamEvent.CONNECTING
+            SocketRoomConnectionEvents.PEER_JOINED_ROOM -> setupPeerConnection()
+            SocketRoomConnectionEvents.JOINED_EXISTING_ROOM -> setupPeerConnection()
+            // TODO Add disconnect logic
+        }
+    }
+
+    private fun setupPeerConnection() {
+        peerConnectionClient.setupPeerConnection(EglBaseWrapper.eglBase)
+        peerConnectionClient.setupCameraStreamingSupport(EglBaseWrapper.eglBase)
     }
 }

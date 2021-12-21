@@ -1,5 +1,6 @@
 package com.webrtcdemo.webrtc_phone_app.webrtc
 
+import com.webrtcdemo.webrtc_phone_app.WebRTCAppLogger
 import org.webrtc.*
 
 open class CustomPeerConnectionObserver : PeerConnection.Observer {
@@ -17,6 +18,7 @@ open class CustomPeerConnectionObserver : PeerConnection.Observer {
 
     override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
         super.onConnectionChange(newState)
+        WebRTCAppLogger.d("connection state: $newState")
     }
 
     override fun onIceConnectionReceivingChange(receiving: Boolean) {

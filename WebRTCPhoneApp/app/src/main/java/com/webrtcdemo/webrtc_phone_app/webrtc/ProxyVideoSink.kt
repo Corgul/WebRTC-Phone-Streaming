@@ -10,7 +10,7 @@ class ProxyVideoSink : VideoSink {
     @Synchronized
     override fun onFrame(frame: VideoFrame) {
         if (targetVideoSink == null) {
-            WebRTCAppLogger.d("Target is null, dropping frame")
+//            WebRTCAppLogger.d("Target is null, dropping frame")
         }
         targetVideoSink?.onFrame(frame)
     }

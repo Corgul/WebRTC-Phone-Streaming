@@ -63,11 +63,11 @@ class SignalingClientImpl @Inject constructor() : SignalingClient {
         }
         // SDP / ICE Candidates are exchanged through this
         socket.on(MESSAGE) { args ->
-            WebRTCAppLogger.d("message received with contents: ${args.contentToString()}")
             handleMessage(args)
         }
     }
 
+    @Synchronized
     private fun handleMessage(args: Array<Any>) {
         val data = args[0]
         if (data is String) {
@@ -92,9 +92,18 @@ class SignalingClientImpl @Inject constructor() : SignalingClient {
         val type = data.getString("type")
 
         when (type.lowercase()) {
-            OFFER -> messageEvents.value = SocketMessageEvents.OfferReceived(data)
-            ANSWER -> messageEvents.value = SocketMessageEvents.AnswerReceived(data)
-            CANDIDATE -> messageEvents.value = SocketMessageEvents.IceCandidateReceived(data)
+            OFFER -> {
+                Thread.sleep(1000)
+                messageEvents.value = SocketMessageEvents.OfferReceived(data)
+            }
+            ANSWER -> {
+                Thread.sleep(1000)
+                messageEvents.value = SocketMessageEvents.AnswerReceived(data)
+            }
+            CANDIDATE -> {
+                Thread.sleep(1000)
+                messageEvents.value = SocketMessageEvents.IceCandidateReceived(data)
+            }
         }
     }
 

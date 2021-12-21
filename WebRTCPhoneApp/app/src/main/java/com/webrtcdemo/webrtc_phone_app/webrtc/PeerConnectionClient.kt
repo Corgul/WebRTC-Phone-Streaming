@@ -9,6 +9,8 @@ import org.webrtc.VideoSink
 interface PeerConnectionClient {
     fun setupPeerConnection(eglBase: EglBase)
 
+    fun setupCameraStreamingSupport(eglBase: EglBase)
+
     fun disconnect()
 
     fun initVideoSink(videoSink: VideoSink)

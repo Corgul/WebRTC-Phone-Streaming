@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.webrtcdemo.webrtc_phone_app.databinding.ViewCameraFragmentBinding
 import com.webrtcdemo.webrtc_phone_app.viewmodel.ViewCameraViewModel
+import com.webrtcdemo.webrtc_phone_app.webrtc.EglBaseWrapper
 import dagger.hilt.android.AndroidEntryPoint
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoSink
@@ -35,6 +36,7 @@ class ViewCameraFragment : Fragment(), SurfaceHolder.Callback {
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
+        surface.init(EglBaseWrapper.eglBase.eglBaseContext, null)
         viewModel.initVideoSink(surface)
     }
 
