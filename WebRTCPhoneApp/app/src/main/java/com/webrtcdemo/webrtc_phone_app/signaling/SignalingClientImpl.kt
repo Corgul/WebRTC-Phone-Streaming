@@ -15,6 +15,7 @@ import org.json.JSONException
 
 import org.webrtc.IceCandidate
 
+//Goce I need you to explain this class to me in detaail
 class SignalingClientImpl @Inject constructor() : SignalingClient {
     private val roomEvents = MutableStateFlow<SocketRoomConnectionEvents?>(null)
     private val messageEvents = MutableStateFlow<SocketMessageEvents?>(null)

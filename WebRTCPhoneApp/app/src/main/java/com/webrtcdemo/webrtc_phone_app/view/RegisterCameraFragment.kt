@@ -21,6 +21,8 @@ import org.webrtc.SurfaceViewRenderer
 class RegisterCameraFragment : Fragment(), SurfaceHolder.Callback {
 
     private val viewModel: RegisterCameraViewModel by viewModels()
+    // Goce is this binding/layout any different than the other one?
+    // Goce is anything different here? Maybe (not necesarry for the project) we can pull some of this code up in a base class
     private lateinit var binding: RegisterCameraFragmentBinding
     private lateinit var surface: SurfaceViewRenderer
 

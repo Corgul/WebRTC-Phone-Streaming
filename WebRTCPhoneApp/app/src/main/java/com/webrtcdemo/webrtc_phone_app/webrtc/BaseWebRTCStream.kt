@@ -14,6 +14,7 @@ interface BaseWebRTCStream {
 
     fun unbindVideoSink()
 
+    // Goce -  we should add commengts :)
     fun getRoomConnectionEventFlow(): Flow<SocketRoomConnectionEvents?>
 
     fun getStreamEventFlow(): Flow<StreamEvent?>

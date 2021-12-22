@@ -10,6 +10,7 @@ import org.webrtc.*
 import javax.inject.Inject
 import org.webrtc.VideoCapturer
 
+//Goce I need you to explain this class to me in detaail
 @ViewModelScoped
 class PeerConnectionClientImpl @Inject constructor(
     @ApplicationContext private val context: Context

@@ -8,8 +8,7 @@
     <fragment
         android:id="@+id/navigation_view_camera"
         android:name="com.webrtcdemo.webrtc_phone_app.view.ViewCameraFragment"
-        android:label="@string/title_view_camera"
-        tools:layout="@layout/view_camera_fragment" />
+        android:label="@string/title_view_camera" />
 
     <fragment
         android:id="@+id/navigation_register_camera"

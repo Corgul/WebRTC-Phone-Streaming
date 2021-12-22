@@ -21,6 +21,7 @@ annotation class WebRTCStreamSenderQualifier
 
 @InstallIn(ViewModelComponent::class)
 @Module
+//Goce - might be my Hilt inexperience but is WebRTCModule used
 object WebRTCModule {
     @Provides
     fun providePeerConnectionClient(@ApplicationContext context: Context): PeerConnectionClient {

@@ -16,6 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ViewCameraViewModel @Inject constructor(
+    //Goce - another HILT question - how does this het injected
     @WebRTCStreamReceiverQualifier private val webRTCStream: BaseWebRTCStream
 ) : ViewModel() {
     val roomName = MutableLiveData<String>()
