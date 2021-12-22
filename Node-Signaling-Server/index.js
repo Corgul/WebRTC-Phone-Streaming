@@ -50,12 +50,14 @@ io.sockets.on("connection", (socket) => {
     //Goce - I think it would be better if we split this, wouldn't it? socket.on("create") and socker.om("join")
     // was there a resaon why you did it this way
     log("Received request to create or join room " + room);
-
+    
+    //Goce - io.sockets.adapter.rooms.get(room); I understsnd what this does buty not sure how
     var clientsInRoom = io.sockets.adapter.rooms.get(room);
     var numClients = clientsInRoom ? clientsInRoom.size : 0;
 
     log("Room " + room + " now has " + numClients + " client(s)");
 
+    //Goce - you will have to explain this to me, not quite sure I understand what is going on here
     if (numClients === 0) {
       socket.join(room);
       log("Client ID " + socket.id + " created room " + room);
