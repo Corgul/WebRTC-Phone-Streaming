@@ -4,12 +4,9 @@ import androidx.lifecycle.*
 import com.webrtcdemo.webrtc_phone_app.WebRTCAppLogger
 import com.webrtcdemo.webrtc_phone_app.di.WebRTCStreamReceiverQualifier
 import com.webrtcdemo.webrtc_phone_app.webrtc.SocketRoomConnectionEvents
-import com.webrtcdemo.webrtc_phone_app.webrtc.StreamEvent
 import com.webrtcdemo.webrtc_phone_app.webrtc.BaseWebRTCStream
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.webrtc.VideoSink
 import javax.inject.Inject
@@ -25,9 +22,7 @@ class ViewCameraViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             webRTCStream.getRoomConnectionEventFlow()
-                .filter { it != null }
-                .onEach { onRoomEvent(it) }
-                .launchIn(viewModelScope)
+                .collect { onRoomEvent(it) }
         }
     }
 
@@ -39,10 +34,7 @@ class ViewCameraViewModel @Inject constructor(
         webRTCStream.unbindVideoSink()
     }
 
-    private fun onRoomEvent(socketRoomConnectionEvent: SocketRoomConnectionEvents?) {
-        if (socketRoomConnectionEvent == null) {
-            return
-        }
+    private fun onRoomEvent(socketRoomConnectionEvent: SocketRoomConnectionEvents) {
         when (socketRoomConnectionEvent) {
             SocketRoomConnectionEvents.CONNECTING -> connectingToRoom()
             SocketRoomConnectionEvents.CONNECTED -> connectedToRoom()
@@ -73,13 +65,14 @@ class ViewCameraViewModel @Inject constructor(
         loadingText.value = "Peer joined our room"
     }
 
-
     fun onJoinRoomClicked() {
-        val room = roomName.value
-        if (room.isNullOrEmpty()) {
-            return
+        viewModelScope.launch {
+            val room = roomName.value
+            if (room.isNullOrEmpty()) {
+                return@launch
+            }
+            webRTCStream.connectToRoom(room)
+            WebRTCAppLogger.d("Join room clicked + $room")
         }
-        webRTCStream.connectToRoom(room)
-        WebRTCAppLogger.d("Join room clicked + $room")
     }
 }

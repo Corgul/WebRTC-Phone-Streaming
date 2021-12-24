@@ -72,11 +72,13 @@ class RegisterCameraViewModel @Inject constructor(
     }
 
     fun onJoinRoomClicked() {
-        val room = roomName.value
-        if (room.isNullOrEmpty()) {
-            return
+        viewModelScope.launch {
+            val room = roomName.value
+            if (room.isNullOrEmpty()) {
+                return@launch
+            }
+            webRTCStream.connectToRoom(room)
+            WebRTCAppLogger.d("Join room clicked + $room")
         }
-        webRTCStream.connectToRoom(room)
-        WebRTCAppLogger.d("Join room clicked + $room")
     }
 }

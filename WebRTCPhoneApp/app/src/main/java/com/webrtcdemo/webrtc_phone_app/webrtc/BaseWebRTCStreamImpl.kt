@@ -1,18 +1,14 @@
 package com.webrtcdemo.webrtc_phone_app.webrtc
 
-import com.webrtcdemo.webrtc_phone_app.WebRTCAppLogger
 import com.webrtcdemo.webrtc_phone_app.signaling.SignalingClient
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.webrtc.IceCandidate
 import org.webrtc.SessionDescription
 import org.webrtc.VideoSink
-import javax.inject.Inject
 
 @ViewModelScoped
 abstract class BaseWebRTCStreamImpl(
@@ -20,18 +16,19 @@ abstract class BaseWebRTCStreamImpl(
     private val peerConnectionClient: PeerConnectionClient,
     private val viewModelScope: CoroutineScope
 ) : BaseWebRTCStream {
-    protected var streamEvents = MutableStateFlow(StreamEvent.NOT_STARTED)
+    private var streamEvents = MutableSharedFlow<StreamEvent>()
 
     init {
         viewModelScope.launch {
+            streamEvents.emit(StreamEvent.NOT_STARTED)
             subscribeRoomConnectionEventFlow()
             subscribeSocketMessageEventFlow()
             subscribePeerConnectionEventFlow()
         }
     }
 
-    override fun connectToRoom(roomName: String) {
-        streamEvents.value = StreamEvent.CONNECTING
+    override suspend fun connectToRoom(roomName: String) {
+        streamEvents.emit(StreamEvent.CONNECTING)
         signalingClient.connect(roomName)
     }
 
@@ -45,32 +42,25 @@ abstract class BaseWebRTCStreamImpl(
 
     private fun subscribeRoomConnectionEventFlow() {
         getRoomConnectionEventFlow()
-            .filter { it != null }
             .onEach { onSocketRoomConnectionEvent(it) }
             .launchIn(viewModelScope)
     }
 
     private fun subscribeSocketMessageEventFlow() {
         getSocketMessageEventFlow()
-            .filter { it != null }
             .onEach { onSocketMessageEvent(it) }
             .launchIn(viewModelScope)
     }
 
     private fun subscribePeerConnectionEventFlow() {
         getPeerConnectionEventFlow()
-            .filter { it != null }
             .onEach { onPeerConnectionEvent(it) }
             .launchIn(viewModelScope)
     }
 
-    abstract fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents?)
+    abstract fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents)
 
-    private fun onSocketMessageEvent(event: SocketMessageEvents?) {
-        if (event == null) {
-            return
-        }
-
+    private suspend fun onSocketMessageEvent(event: SocketMessageEvents) {
         when (event) {
             is SocketMessageEvents.AnswerReceived -> peerConnectionClient.onAnswerReceived(jsonObjectToSDP(event.data))
             is SocketMessageEvents.OfferReceived -> peerConnectionClient.onOfferReceived(jsonObjectToSDP(event.data))
@@ -93,19 +83,15 @@ abstract class BaseWebRTCStreamImpl(
         )
     }
 
-    private fun onPeerConnectionEvent(event: PeerConnectionEvents?) {
-        if (event == null) {
-            return
-        }
-
+    private suspend fun onPeerConnectionEvent(event: PeerConnectionEvents) {
         when (event) {
             is PeerConnectionEvents.OfferCreated -> signalingClient.sendSDPMessage(event.sdp)
             is PeerConnectionEvents.AnswerCreated -> signalingClient.sendSDPMessage(event.sdp)
             is PeerConnectionEvents.IceCandidateCreated -> signalingClient.sendIceCandidate(event.iceCandidate)
-            is PeerConnectionEvents.PeerStreamConnected -> streamEvents.value = StreamEvent.CONNECTED
+            is PeerConnectionEvents.PeerStreamConnected -> streamEvents.emit(StreamEvent.CONNECTED)
             is PeerConnectionEvents.PeerStreamDisconnected -> {
                 cleanup()
-                streamEvents.value = StreamEvent.NOT_STARTED
+                streamEvents.emit(StreamEvent.NOT_STARTED)
             }
         }
     }
@@ -115,9 +101,9 @@ abstract class BaseWebRTCStreamImpl(
         peerConnectionClient.disconnect()
     }
 
-    override fun getRoomConnectionEventFlow(): Flow<SocketRoomConnectionEvents?> = signalingClient.getSocketRoomEventFlow()
+    override fun getRoomConnectionEventFlow(): Flow<SocketRoomConnectionEvents> = signalingClient.getSocketRoomEventFlow()
 
-    override fun getStreamEventFlow(): Flow<StreamEvent?> = streamEvents
+    override fun getStreamEventFlow(): Flow<StreamEvent> = streamEvents
 
     private fun getSocketMessageEventFlow() = signalingClient.getSocketMessageEventFlow()
 

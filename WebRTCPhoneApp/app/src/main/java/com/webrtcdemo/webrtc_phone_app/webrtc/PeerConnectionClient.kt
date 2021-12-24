@@ -19,7 +19,7 @@ interface PeerConnectionClient {
 
     fun createOffer()
 
-    fun onOfferReceived(offer: SessionDescription)
+    suspend fun onOfferReceived(offer: SessionDescription)
 
     fun createAnswer()
 
@@ -27,5 +27,5 @@ interface PeerConnectionClient {
 
     fun onIceCandidateReceived(iceCandidate: IceCandidate)
 
-    fun getPeerConnectionEventFlow(): Flow<PeerConnectionEvents?>
+    fun getPeerConnectionEventFlow(): Flow<PeerConnectionEvents>
 }

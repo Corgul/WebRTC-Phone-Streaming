@@ -7,16 +7,12 @@ import javax.inject.Inject
 
 @ViewModelScoped
 class WebRTCStreamSender @Inject constructor(
-    private val signalingClient: SignalingClient,
+    signalingClient: SignalingClient,
     private val peerConnectionClient: PeerConnectionClient,
-    private val viewModelScope: CoroutineScope
+    viewModelScope: CoroutineScope
 ) : BaseWebRTCStreamImpl(signalingClient, peerConnectionClient, viewModelScope) {
-    override fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents?) {
-        if (event == null) {
-            return
-        }
+    override fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents) {
         when (event) {
-            SocketRoomConnectionEvents.CONNECTING -> streamEvents.value = StreamEvent.CONNECTING
             SocketRoomConnectionEvents.PEER_JOINED_ROOM -> setupPeerConnection()
             SocketRoomConnectionEvents.JOINED_EXISTING_ROOM -> setupPeerConnection()
             // TODO Add disconnect logic
