@@ -1,20 +1,23 @@
 package com.webrtcdemo.webrtc_phone_app.view
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import com.webrtcdemo.webrtc_phone_app.R
 import com.webrtcdemo.webrtc_phone_app.databinding.RegisterCameraFragmentBinding
 import com.webrtcdemo.webrtc_phone_app.viewmodel.RegisterCameraViewModel
 import com.webrtcdemo.webrtc_phone_app.webrtc.EglBaseWrapper
 import dagger.hilt.android.AndroidEntryPoint
-import org.webrtc.EglBase
 import org.webrtc.SurfaceViewRenderer
 
 @AndroidEntryPoint
@@ -23,6 +26,11 @@ class RegisterCameraFragment : Fragment(), SurfaceHolder.Callback {
     private val viewModel: RegisterCameraViewModel by viewModels()
     private lateinit var binding: RegisterCameraFragmentBinding
     private lateinit var surface: SurfaceViewRenderer
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requestCameraPermission()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,5 +55,25 @@ class RegisterCameraFragment : Fragment(), SurfaceHolder.Callback {
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+    }
+
+    private fun requestCameraPermission() {
+        val permissionName = Manifest.permission.CAMERA
+        if (ContextCompat.checkSelfPermission(requireContext(), permissionName) == PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+        val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (!isGranted) {
+                // If the user denies giving the permission, kick them back to the ViewCameraFragment
+                showToast(getString(R.string.permission_denied_toast))
+                findNavController().popBackStack()
+            }
+        }
+        requestPermissionLauncher.launch(permissionName)
+    }
+
+    private fun showToast(text: String) {
+        val toast = Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT)
+        toast.show()
     }
 }

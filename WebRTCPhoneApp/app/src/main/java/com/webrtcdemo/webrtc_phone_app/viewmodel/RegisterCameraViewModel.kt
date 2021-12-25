@@ -1,15 +1,11 @@
 package com.webrtcdemo.webrtc_phone_app.viewmodel
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.webrtcdemo.webrtc_phone_app.WebRTCAppLogger
 import com.webrtcdemo.webrtc_phone_app.di.WebRTCStreamSenderQualifier
 import com.webrtcdemo.webrtc_phone_app.webrtc.BaseWebRTCStream
 import com.webrtcdemo.webrtc_phone_app.webrtc.SocketRoomConnectionEvents
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -27,7 +23,6 @@ class RegisterCameraViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             webRTCStream.getRoomConnectionEventFlow()
-                .filter { it != null }
                 .onEach { onRoomEvent(it) }
                 .launchIn(viewModelScope)
         }

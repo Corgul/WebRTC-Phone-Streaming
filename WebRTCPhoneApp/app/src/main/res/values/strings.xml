@@ -2,6 +2,7 @@
     <string name="app_name">WebRTC-Phone-App</string>
     <string name="title_view_camera">View Camera</string>
     <string name="title_register_camera">Register Camera</string>
+    <string name="permission_denied_toast">You must grant the permission in the settings to register the camera</string>
     <string name="join_room">Join Room</string>
     <string name="room_name">Room Name</string>
 </resources>
