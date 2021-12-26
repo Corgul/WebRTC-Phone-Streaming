@@ -25,6 +25,8 @@ class RegisterCameraFragment : Fragment(), SurfaceHolder.Callback {
 
     private val viewModel: RegisterCameraViewModel by viewModels()
     private lateinit var binding: RegisterCameraFragmentBinding
+    // SurfaceViewRenderer is like a normal SurfaceView but also implements VideoSink to make it easy to feed this surface into the video track
+    // to display incoming frames
     private lateinit var surface: SurfaceViewRenderer
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +43,7 @@ class RegisterCameraFragment : Fragment(), SurfaceHolder.Callback {
         binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
         surface = binding.videoView
+        // We register the fragment as a callback to know when the Surface has been created. That way we can attach it to the stream
         surface.holder.addCallback(this)
         return binding.root
     }
