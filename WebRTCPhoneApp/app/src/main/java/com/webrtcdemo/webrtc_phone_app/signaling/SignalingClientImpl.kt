@@ -1,11 +1,11 @@
 package com.webrtcdemo.webrtc_phone_app.signaling
 
-import io.socket.client.IO
 import io.socket.client.Socket
 import com.webrtcdemo.webrtc_phone_app.WebRTCAppLogger
 import com.webrtcdemo.webrtc_phone_app.di.ViewModelCoroutineScope
 import com.webrtcdemo.webrtc_phone_app.webrtc.SocketRoomConnectionEvents
 import com.webrtcdemo.webrtc_phone_app.webrtc.SocketMessageEvents
+import com.webrtcdemo.webrtc_phone_app.webrtc.extensions.toJson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,11 +18,11 @@ import org.json.JSONException
 import org.webrtc.IceCandidate
 
 class SignalingClientImpl @Inject constructor(
+    private val socket: Socket,
     @ViewModelCoroutineScope private val viewModelScope: CoroutineScope
 ) : SignalingClient {
     private val roomEvents = MutableSharedFlow<SocketRoomConnectionEvents>()
     private val messageEvents = MutableSharedFlow<SocketMessageEvents>()
-    private val socket: Socket = IO.socket("http://webrtc-demo-signaling-server.herokuapp.com/")
     private lateinit var roomName: String
 
     override suspend fun connect(roomName: String) {
@@ -85,9 +85,7 @@ class SignalingClientImpl @Inject constructor(
     override fun sendSDPMessage(sdp: SessionDescription) {
         try {
             WebRTCAppLogger.d("sendSDPMessage() called with sdp: $sdp")
-            val json = JSONObject()
-            json.put("type", sdp.type.canonicalForm())
-            json.put("sdp", sdp.description)
+            val json = sdp.toJson()
             WebRTCAppLogger.d("sending: $json")
             socket.emit("message", json)
         } catch (e: JSONException) {
@@ -97,11 +95,7 @@ class SignalingClientImpl @Inject constructor(
 
     override fun sendIceCandidate(iceCandidate: IceCandidate) {
         try {
-            val json = JSONObject()
-            json.put("type", "candidate")
-            json.put("label", iceCandidate.sdpMLineIndex)
-            json.put("id", iceCandidate.sdpMid)
-            json.put("candidate", iceCandidate.sdp)
+            val json = iceCandidate.toJson()
             WebRTCAppLogger.d("sending: $json")
             socket.emit("message", json)
         } catch (e: Exception) {

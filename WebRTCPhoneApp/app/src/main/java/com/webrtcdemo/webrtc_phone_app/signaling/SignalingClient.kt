@@ -12,17 +12,25 @@ interface SignalingClient {
      */
     suspend fun connect(roomName: String = "")
 
+    /**
+     * Gets the flow of [SocketRoomConnectionEvents].
+     * These events give information on the socket room connection status and if peers join our existing room
+     */
     fun getSocketRoomEventFlow(): Flow<SocketRoomConnectionEvents>
 
+    /**
+     * Gets the flow of [SocketMessageEvents]
+     * These messages contain peer information to plug into the WebRTC Library such as IceCandidates and SDP Offer/Answer
+     */
     fun getSocketMessageEventFlow(): Flow<SocketMessageEvents>
 
     /**
-     * Emits an SDP Offer or Answer
+     * Emits an SDP Offer or Answer to the socket
      */
     fun sendSDPMessage(sdp: SessionDescription)
 
     /**
-     * Emits an ice candidate
+     * Emits an ice candidate to the socket
      */
     fun sendIceCandidate(iceCandidate: IceCandidate)
 

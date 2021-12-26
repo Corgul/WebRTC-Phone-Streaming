@@ -6,13 +6,23 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import io.socket.client.IO
+import io.socket.client.Socket
 import kotlinx.coroutines.CoroutineScope
 
 @InstallIn(ViewModelComponent::class)
 @Module
 object SignalingModule {
     @Provides
-    fun providesSignalingClient(@ViewModelCoroutineScope coroutineScope: CoroutineScope): SignalingClient {
-        return SignalingClientImpl(coroutineScope)
+    fun providesSignalingClient(
+        socket: Socket,
+        @ViewModelCoroutineScope coroutineScope: CoroutineScope
+    ): SignalingClient {
+        return SignalingClientImpl(socket, coroutineScope)
+    }
+
+    @Provides
+    fun provideSocket(): Socket {
+        return IO.socket("http://webrtc-demo-signaling-server.herokuapp.com/")
     }
 }
