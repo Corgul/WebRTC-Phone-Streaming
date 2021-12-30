@@ -10,11 +10,11 @@ interface SignalingClient {
     /**
      * Connects to the socket and joins the room if the name is non empty
      */
-    fun connect(roomName: String = "")
+    suspend fun connect(roomName: String = "")
 
-    fun getSocketRoomEventFlow(): Flow<SocketRoomConnectionEvents?>
+    fun getSocketRoomEventFlow(): Flow<SocketRoomConnectionEvents>
 
-    fun getSocketMessageEventFlow(): Flow<SocketMessageEvents?>
+    fun getSocketMessageEventFlow(): Flow<SocketMessageEvents>
 
     /**
      * Emits an SDP Offer or Answer

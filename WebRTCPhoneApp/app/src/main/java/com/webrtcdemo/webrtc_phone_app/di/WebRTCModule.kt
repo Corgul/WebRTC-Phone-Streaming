@@ -23,8 +23,11 @@ annotation class WebRTCStreamSenderQualifier
 @Module
 object WebRTCModule {
     @Provides
-    fun providePeerConnectionClient(@ApplicationContext context: Context): PeerConnectionClient {
-        return PeerConnectionClientImpl(context)
+    fun providePeerConnectionClient(
+        @ApplicationContext context: Context,
+        @ViewModelCoroutineScope coroutineScope: CoroutineScope
+    ): PeerConnectionClient {
+        return PeerConnectionClientImpl(context, coroutineScope)
     }
 
     @Provides

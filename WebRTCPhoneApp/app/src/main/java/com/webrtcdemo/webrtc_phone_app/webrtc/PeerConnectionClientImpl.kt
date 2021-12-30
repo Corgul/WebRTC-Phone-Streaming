@@ -2,21 +2,26 @@ package com.webrtcdemo.webrtc_phone_app.webrtc
 
 import android.content.Context
 import com.webrtcdemo.webrtc_phone_app.WebRTCAppLogger
+import com.webrtcdemo.webrtc_phone_app.di.ViewModelCoroutineScope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import org.webrtc.*
 import javax.inject.Inject
 import org.webrtc.VideoCapturer
 
 @ViewModelScoped
 class PeerConnectionClientImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    @ViewModelCoroutineScope private val viewModelScope: CoroutineScope
 ) : PeerConnectionClient {
     private var peerConnectionFactory: PeerConnectionFactory? = null
     private var peerConnection: PeerConnection? = null
-    private val peerConnectionEvents = MutableStateFlow<PeerConnectionEvents?>(null)
+    private val peerConnectionEvents = MutableSharedFlow<PeerConnectionEvents>()
     private val videoSink = ProxyVideoSink()
     private var surfaceTextureHelper: SurfaceTextureHelper? = null
 
@@ -93,14 +98,16 @@ class PeerConnectionClientImpl @Inject constructor(
         if (iceCandidate == null) {
             return
         }
-        Thread.sleep(1000)
-        peerConnectionEvents.value = PeerConnectionEvents.IceCandidateCreated(iceCandidate)
+        viewModelScope.launch { peerConnectionEvents.emit(PeerConnectionEvents.IceCandidateCreated(iceCandidate)) }
     }
 
     private fun addRemoteStream(stream: MediaStream) {
-        WebRTCAppLogger.d("Added stream")
-        val videoTrack = stream.videoTracks.first()
-        videoTrack.addSink(videoSink)
+        viewModelScope.launch {
+            WebRTCAppLogger.d("Added stream")
+            val videoTrack = stream.videoTracks.first()
+            videoTrack.addSink(videoSink)
+            peerConnectionEvents.emit(PeerConnectionEvents.PeerStreamConnected)
+        }
     }
 
     override fun disconnect() {
@@ -118,39 +125,41 @@ class PeerConnectionClientImpl @Inject constructor(
         peerConnection?.let { peerConnection ->
             peerConnection.createOffer(object : CustomSdpObserver() {
                 override fun onCreateSuccess(sdp: SessionDescription) {
-                    super.onCreateSuccess(sdp)
-                    peerConnection.setLocalDescription(CustomSdpObserver(), sdp)
-                    peerConnectionEvents.value = PeerConnectionEvents.OfferCreated(sdp)
+                    viewModelScope.launch {
+                        super.onCreateSuccess(sdp)
+                        peerConnection.setLocalDescription(CustomSdpObserver(), sdp)
+                        peerConnectionEvents.emit(PeerConnectionEvents.OfferCreated(sdp))
+                    }
                 }
             }, sdpConstraints)
         }
     }
 
     override fun createAnswer() {
-        Thread.sleep(1000)
         peerConnection?.let { peerConnection ->
             peerConnection.createAnswer(object : CustomSdpObserver() {
                 override fun onCreateSuccess(sdp: SessionDescription) {
-                    super.onCreateSuccess(sdp)
-                    WebRTCAppLogger.d("Created answer")
-                    peerConnection.setLocalDescription(CustomSdpObserver(), sdp)
-                    peerConnectionEvents.value = PeerConnectionEvents.AnswerCreated(sdp)
+                    viewModelScope.launch {
+                        super.onCreateSuccess(sdp)
+                        WebRTCAppLogger.d("Created answer")
+                        peerConnection.setLocalDescription(CustomSdpObserver(), sdp)
+                        peerConnectionEvents.emit(PeerConnectionEvents.AnswerCreated(sdp))
+                    }
                 }
             }, MediaConstraints())
         }
     }
 
-    override fun onOfferReceived(offer: SessionDescription) {
+    override suspend fun onOfferReceived(offer: SessionDescription) {
         WebRTCAppLogger.d("Offer received")
         peerConnection?.setRemoteDescription(CustomSdpObserver(), offer)
-        peerConnectionEvents.value = PeerConnectionEvents.PeerStreamConnected
+        peerConnectionEvents.emit(PeerConnectionEvents.PeerStreamConnected)
         createAnswer()
     }
 
     override fun onAnswerReceived(answer: SessionDescription) {
         WebRTCAppLogger.d("Answer received")
         peerConnection?.setRemoteDescription(CustomSdpObserver(), answer)
-        peerConnectionEvents.value = PeerConnectionEvents.PeerStreamConnected
     }
 
     override fun onIceCandidateReceived(iceCandidate: IceCandidate) {
@@ -186,5 +195,5 @@ class PeerConnectionClientImpl @Inject constructor(
         return null
     }
 
-    override fun getPeerConnectionEventFlow(): Flow<PeerConnectionEvents?> = peerConnectionEvents
+    override fun getPeerConnectionEventFlow(): Flow<PeerConnectionEvents> = peerConnectionEvents
 }
