@@ -2,6 +2,7 @@ package com.webrtcdemo.webrtc_phone_app.di
 
 import android.content.Context
 import com.webrtcdemo.webrtc_phone_app.signaling.SignalingClient
+import com.webrtcdemo.webrtc_phone_app.use_case.GetIceServersUseCase
 import com.webrtcdemo.webrtc_phone_app.webrtc.*
 import dagger.Module
 import dagger.Provides
@@ -35,9 +36,10 @@ object WebRTCModule {
     fun provideWebRTCStreamReceiver(
         signalingClient: SignalingClient,
         peerConnectionClient: PeerConnectionClient,
-        @ViewModelCoroutineScope coroutineScope: CoroutineScope
+        @ViewModelCoroutineScope coroutineScope: CoroutineScope,
+        getIceServersUseCase: GetIceServersUseCase
     ): BaseWebRTCStream {
-        return WebRTCStreamReceiver(signalingClient, peerConnectionClient, coroutineScope)
+        return WebRTCStreamReceiver(signalingClient, peerConnectionClient, coroutineScope, getIceServersUseCase)
     }
 
     @Provides
@@ -45,8 +47,9 @@ object WebRTCModule {
     fun provideWebRTCStreamSender(
         signalingClient: SignalingClient,
         peerConnectionClient: PeerConnectionClient,
-        @ViewModelCoroutineScope coroutineScope: CoroutineScope
+        @ViewModelCoroutineScope coroutineScope: CoroutineScope,
+        getIceServersUseCase: GetIceServersUseCase
     ): BaseWebRTCStream {
-        return WebRTCStreamSender(signalingClient, peerConnectionClient, coroutineScope)
+        return WebRTCStreamSender(signalingClient, peerConnectionClient, coroutineScope, getIceServersUseCase)
     }
 }

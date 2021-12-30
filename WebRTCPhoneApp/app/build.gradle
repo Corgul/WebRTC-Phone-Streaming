@@ -21,9 +21,9 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "XIRSYS_IDENT", apiKeyProperties['XIRSYS_IDENT'])
-        buildConfigField("String", "XIRSYS_SECRET", apiKeyProperties['XIRSYS_SECRET'])
-        buildConfigField("String", "XIRSYS_CHANNEL", apiKeyProperties['XIRSYS_CHANNEL'])
+        buildConfigField "String", "XIRSYS_IDENT", apiKeyProperties['XIRSYS_IDENT']
+        buildConfigField "String", "XIRSYS_SECRET", apiKeyProperties['XIRSYS_SECRET']
+        buildConfigField "String", "XIRSYS_CHANNEL", apiKeyProperties['XIRSYS_CHANNEL']
     }
 
     buildTypes {
@@ -48,7 +48,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
-    def retrofitVersion = "2.3.0"
+    def retrofitVersion = "2.9.0"
     def coroutineVersion = '1.5.0'
     def nav_version = '2.3.5'
     def lifecycle_version = "2.4.0"

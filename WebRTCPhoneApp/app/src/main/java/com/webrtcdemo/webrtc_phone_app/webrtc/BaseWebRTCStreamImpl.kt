@@ -1,6 +1,7 @@
 package com.webrtcdemo.webrtc_phone_app.webrtc
 
 import com.webrtcdemo.webrtc_phone_app.signaling.SignalingClient
+import com.webrtcdemo.webrtc_phone_app.use_case.GetIceServersUseCase
 import com.webrtcdemo.webrtc_phone_app.webrtc.extensions.toIceCandidate
 import com.webrtcdemo.webrtc_phone_app.webrtc.extensions.toSessionDescription
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -60,11 +61,18 @@ abstract class BaseWebRTCStreamImpl(
             .launchIn(viewModelScope)
     }
 
+    private fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents) {
+        when (event) {
+            SocketRoomConnectionEvents.PEER_JOINED_ROOM -> setupPeerConnection()
+            SocketRoomConnectionEvents.JOINED_EXISTING_ROOM -> setupPeerConnection()
+            // TODO Add disconnect logic
+        }
+    }
+
     /**
-     * Left to inherit since the ViewCameraFragment and RegisterCameraFragment will have different behavior based on the signaling
-     * server connection events
+     * Left to inherit since the Sender and Receiver will both have their own specific setup behavior
      */
-    abstract fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents)
+    protected abstract fun setupPeerConnection()
 
     private suspend fun onSocketMessageEvent(event: SocketMessageEvents) {
         when (event) {

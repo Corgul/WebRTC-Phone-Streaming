@@ -1,10 +1,7 @@
 package com.webrtcdemo.webrtc_phone_app.webrtc
 
 import kotlinx.coroutines.flow.Flow
-import org.webrtc.EglBase
-import org.webrtc.IceCandidate
-import org.webrtc.SessionDescription
-import org.webrtc.VideoSink
+import org.webrtc.*
 
 interface PeerConnectionClient {
     /**
@@ -12,6 +9,13 @@ interface PeerConnectionClient {
      * @param eglBase the [EglBase] to use for video decoding/encoding
      */
     fun setupPeerConnection(eglBase: EglBase)
+
+    /**
+     * Sets up the peer connection objects
+     * @param eglBase the [EglBase] to use for video decoding/encoding
+     * @param iceServers the list of ice servers (STUN/TURN)
+     */
+    fun setupPeerConnection(eglBase: EglBase, iceServers: List<PeerConnection.IceServer>?)
 
     /**
      * Sets up streaming support from the phone's camera
