@@ -1,6 +1,8 @@
 package com.webrtcdemo.webrtc_phone_app.webrtc
 
 import com.webrtcdemo.webrtc_phone_app.signaling.SignalingClient
+import com.webrtcdemo.webrtc_phone_app.webrtc.extensions.toIceCandidate
+import com.webrtcdemo.webrtc_phone_app.webrtc.extensions.toSessionDescription
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -58,6 +60,10 @@ abstract class BaseWebRTCStreamImpl(
             .launchIn(viewModelScope)
     }
 
+    /**
+     * Left to inherit since the ViewCameraFragment and RegisterCameraFragment will have different behavior based on the signaling
+     * server connection events
+     */
     abstract fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents)
 
     private suspend fun onSocketMessageEvent(event: SocketMessageEvents) {
@@ -68,20 +74,9 @@ abstract class BaseWebRTCStreamImpl(
         }
     }
 
-    private fun jsonObjectToSDP(data: JSONObject): SessionDescription {
-        return SessionDescription(
-            SessionDescription.Type.fromCanonicalForm(data.getString("type").lowercase()),
-            data.getString("sdp")
-        )
-    }
+    private fun jsonObjectToSDP(data: JSONObject) = data.toSessionDescription()
 
-    private fun jsonObjectToIce(data: JSONObject): IceCandidate {
-        return IceCandidate(
-            data.getString("id"),
-            data.getInt("label"),
-            data.getString("candidate")
-        )
-    }
+    private fun jsonObjectToIce(data: JSONObject) = data.toIceCandidate()
 
     private suspend fun onPeerConnectionEvent(event: PeerConnectionEvents) {
         when (event) {

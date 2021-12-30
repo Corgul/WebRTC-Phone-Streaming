@@ -8,7 +8,6 @@ import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.webrtc.*
 import javax.inject.Inject
@@ -23,7 +22,6 @@ class PeerConnectionClientImpl @Inject constructor(
     private var peerConnection: PeerConnection? = null
     private val peerConnectionEvents = MutableSharedFlow<PeerConnectionEvents>()
     private val videoSink = ProxyVideoSink()
-    private var surfaceTextureHelper: SurfaceTextureHelper? = null
 
     override fun initVideoSink(videoSink: VideoSink) {
         WebRTCAppLogger.d("initVideoSink")
@@ -40,11 +38,13 @@ class PeerConnectionClientImpl @Inject constructor(
     }
 
     private fun setupPeerConnectionFactory(eglBase: EglBase) {
+        // Default initialization options for the PeerConnectionFactory
         val initializationOptions = PeerConnectionFactory.InitializationOptions
             .builder(context)
             .createInitializationOptions()
         PeerConnectionFactory.initialize(initializationOptions)
 
+        // Default options and video encoder/decoder for the PeerConnectionFactory
         val options = PeerConnectionFactory.Options()
         val defaultVideoEncoderFactory = DefaultVideoEncoderFactory(eglBase.eglBaseContext, true, true)
         val defaultVideoDecoderFactory = DefaultVideoDecoderFactory(eglBase.eglBaseContext)
@@ -60,8 +60,10 @@ class PeerConnectionClientImpl @Inject constructor(
 
     private fun setupPeerConnection() {
         // TODO - Use xirsys for TURN and STUN Server
+        // No ICE Servers (STUN/TURN) passed in yet, just use the default STUN Servers the library uses
         val rtcConfig = PeerConnection.RTCConfiguration(listOf())
 
+        // Gather ICE Candidates for each media track. If set to "BALANCED" will gather ice candidates for each media type (audio/video)
         rtcConfig.bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE
 
         peerConnection = peerConnectionFactory?.createPeerConnection(rtcConfig, object : CustomPeerConnectionObserver() {
@@ -78,20 +80,31 @@ class PeerConnectionClientImpl @Inject constructor(
     }
 
     override fun setupCameraStreamingSupport(eglBase: EglBase) {
-        val videoCapturer = createCameraCapturer(Camera1Enumerator(false))
+        // Uses the helper class VideoCapturer to capture the camera feed
+        val videoCapturer = createCameraCapturer(Camera1Enumerator(false)) ?: return
+        // Uses a SurfaceTexture to help create the WebRTC video frames
+        val surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", eglBase.eglBaseContext)
+        val videoSource = peerConnectionFactory?.createVideoSource(videoCapturer.isScreencast)
 
-        if (videoCapturer != null) {
-            surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", eglBase.eglBaseContext)
-            val videoSource = peerConnectionFactory?.createVideoSource(videoCapturer.isScreencast)
-            videoCapturer.initialize(surfaceTextureHelper, context, videoSource?.capturerObserver)
-            videoCapturer.startCapture(1024, 720, 30)
-            val localVideoTrack = peerConnectionFactory?.createVideoTrack("100", videoSource)
-            localVideoTrack?.setEnabled(true)
-            localVideoTrack?.addSink(videoSink)
-            val stream = peerConnectionFactory?.createLocalMediaStream("101")
-            stream?.addTrack(localVideoTrack)
-            peerConnection?.addStream(stream)
-        }
+        // Initializes to render camera frames on to the SurfaceTextureHelper, register itself as a listener, and forward frames to the captureObserver
+        videoCapturer.initialize(surfaceTextureHelper, context, videoSource?.capturerObserver)
+        // Records camera at 1024/720 at 30 FPS
+        videoCapturer.startCapture(1024, 720, 30)
+
+        createLocalVideoStream(videoSource)
+    }
+
+    private fun createLocalVideoStream(videoSource: VideoSource?) {
+        // Create video track with arbitrary id
+        val localVideoTrack = peerConnectionFactory?.createVideoTrack("100", videoSource)
+        localVideoTrack?.setEnabled(true)
+        // Allows us to see our own camera stream
+        localVideoTrack?.addSink(videoSink)
+
+        // Create MediaStream with arbitrary id
+        val stream = peerConnectionFactory?.createLocalMediaStream("101")
+        stream?.addTrack(localVideoTrack)
+        peerConnection?.addStream(stream)
     }
 
     private fun onIceCandidateCreated(iceCandidate: IceCandidate?) {
@@ -105,6 +118,7 @@ class PeerConnectionClientImpl @Inject constructor(
         viewModelScope.launch {
             WebRTCAppLogger.d("Added stream")
             val videoTrack = stream.videoTracks.first()
+            // Adds the sink to the video track, causing all frames from the track to be fed into it
             videoTrack.addSink(videoSink)
             peerConnectionEvents.emit(PeerConnectionEvents.PeerStreamConnected)
         }
@@ -170,29 +184,21 @@ class PeerConnectionClientImpl @Inject constructor(
     private fun createCameraCapturer(enumerator: CameraEnumerator): VideoCapturer? {
         val deviceNames = enumerator.deviceNames
 
-        WebRTCAppLogger.d("Looking for back facing cameras.")
         for (deviceName in deviceNames) {
             if (enumerator.isBackFacing(deviceName)) {
                 WebRTCAppLogger.d("Creating front facing camera capturer.")
-                val videoCapturer: VideoCapturer? = enumerator.createCapturer(deviceName, null)
-                if (videoCapturer != null) {
-                    return videoCapturer
-                }
-            }
-        }
-
-        WebRTCAppLogger.d("Looking for front cameras.")
-        for (deviceName in deviceNames) {
-            if (enumerator.isFrontFacing(deviceName)) {
-                WebRTCAppLogger.d("Creating other camera capturer.")
-                val videoCapturer: VideoCapturer? = enumerator.createCapturer(deviceName, null)
-                if (videoCapturer != null) {
-                    return videoCapturer
-                }
+                return createVideoCapturerHelper(enumerator, deviceName)
+            } else if (enumerator.isFrontFacing(deviceName)) {
+                WebRTCAppLogger.d("Creating back facing camera capturer.")
+                return createVideoCapturerHelper(enumerator, deviceName)
             }
         }
 
         return null
+    }
+
+    private fun createVideoCapturerHelper(enumerator: CameraEnumerator, deviceName: String): VideoCapturer? {
+        return enumerator.createCapturer(deviceName, null)
     }
 
     override fun getPeerConnectionEventFlow(): Flow<PeerConnectionEvents> = peerConnectionEvents
