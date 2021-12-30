@@ -13,9 +13,11 @@ data class IceServerDetailDto(
 )
 
 fun IceServerDetailDto.toIceServer(): PeerConnection.IceServer {
+    // If there is no username and credential then it is a STUN Server
     if (this.credential == null) {
         return PeerConnection.IceServer.builder(this.url).createIceServer()
     }
+    // Otherwise it is a TURN server
     return PeerConnection.IceServer.builder(this.url)
         .setUsername(this.username)
         .setPassword(this.credential)

@@ -3,9 +3,12 @@ package com.webrtcdemo.webrtc_phone_app.data.remote.dto
 import com.google.gson.annotations.SerializedName
 import org.webrtc.PeerConnection
 
+/**
+ * Data transfer object encapsulating the data returned from the API class IceServerApi
+ */
 data class IceServerDto(
     @SerializedName("s")
-    val success: String,
+    val status: String,
     @SerializedName("v")
     val iceServerDetailList: IceServerDetailListDto
 ) {

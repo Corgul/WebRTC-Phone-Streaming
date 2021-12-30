@@ -5,6 +5,8 @@ plugins {
     id 'kotlin-kapt'
 }
 
+// In order for this project to build you need to add your own apikey.properties file with the information located on your Xirsys dashboard
+// You can create a free account https://global.xirsys.net/dashboard/signup
 def apiKeyPropertiesFile = rootProject.file("apikey.properties")
 def apiKeyProperties = new Properties()
 apiKeyProperties.load(new FileInputStream(apiKeyPropertiesFile))

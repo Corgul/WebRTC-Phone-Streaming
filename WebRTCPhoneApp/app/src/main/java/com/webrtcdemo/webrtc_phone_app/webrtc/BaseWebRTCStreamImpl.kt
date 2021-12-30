@@ -1,5 +1,7 @@
 package com.webrtcdemo.webrtc_phone_app.webrtc
 
+import com.webrtcdemo.webrtc_phone_app.WebRTCAppLogger
+import com.webrtcdemo.webrtc_phone_app.common.Resource
 import com.webrtcdemo.webrtc_phone_app.signaling.SignalingClient
 import com.webrtcdemo.webrtc_phone_app.use_case.GetIceServersUseCase
 import com.webrtcdemo.webrtc_phone_app.webrtc.extensions.toIceCandidate
@@ -17,7 +19,8 @@ import org.webrtc.VideoSink
 abstract class BaseWebRTCStreamImpl(
     private val signalingClient: SignalingClient,
     private val peerConnectionClient: PeerConnectionClient,
-    private val viewModelScope: CoroutineScope
+    private val viewModelScope: CoroutineScope,
+    private val getIceServersUseCase: GetIceServersUseCase
 ) : BaseWebRTCStream {
     private var streamEvents = MutableSharedFlow<StreamEvent>()
 
@@ -72,7 +75,27 @@ abstract class BaseWebRTCStreamImpl(
     /**
      * Left to inherit since the Sender and Receiver will both have their own specific setup behavior
      */
-    protected abstract fun setupPeerConnection()
+    private fun setupPeerConnection() {
+        viewModelScope.launch {
+            // Only setup the peer connection after we have attempted to get the list of ice servers from the API
+            getIceServersUseCase().collect { result ->
+                when (result) {
+                    is Resource.Success -> peerConnectionClient.setupPeerConnection(EglBaseWrapper.eglBase, result.data)
+                    is Resource.Error -> {
+                        WebRTCAppLogger.d("Error received from API: ${result.message}")
+                        peerConnectionClient.setupPeerConnection(EglBaseWrapper.eglBase)
+                    }
+                }
+                auxiliaryPeerConnectionSetup()
+            }
+        }
+    }
+
+    /**
+     * Inherit if there are any other setup methods that need to be called after setupPeerConnection has completed
+     * Should always be called after [PeerConnectionClient.setupPeerConnection]
+     */
+    protected abstract fun auxiliaryPeerConnectionSetup()
 
     private suspend fun onSocketMessageEvent(event: SocketMessageEvents) {
         when (event) {
