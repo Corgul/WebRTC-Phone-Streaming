@@ -1,6 +1,7 @@
 package com.webrtcdemo.webrtc_phone_app.webrtc
 
 import com.webrtcdemo.webrtc_phone_app.signaling.SignalingClient
+import com.webrtcdemo.webrtc_phone_app.use_case.GetIceServersUseCase
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
@@ -9,20 +10,12 @@ import javax.inject.Inject
 class WebRTCStreamReceiver @Inject constructor(
     signalingClient: SignalingClient,
     private val peerConnectionClient: PeerConnectionClient,
-    viewModelScope: CoroutineScope
-) : BaseWebRTCStreamImpl(signalingClient, peerConnectionClient, viewModelScope) {
+    viewModelScope: CoroutineScope,
+    getIceServersUseCase: GetIceServersUseCase
+) : BaseWebRTCStreamImpl(signalingClient, peerConnectionClient, viewModelScope, getIceServersUseCase) {
 
-    override fun onSocketRoomConnectionEvent(event: SocketRoomConnectionEvents) {
-        when (event) {
-            SocketRoomConnectionEvents.PEER_JOINED_ROOM -> initiatePeerConnection()
-            SocketRoomConnectionEvents.JOINED_EXISTING_ROOM -> initiatePeerConnection()
-            // TODO Add disconnect logic
-        }
-    }
-
-    // Move this work off of the main thread
-    private fun initiatePeerConnection() {
-        peerConnectionClient.setupPeerConnection(EglBaseWrapper.eglBase)
+    override fun auxiliaryPeerConnectionSetup() {
+        // Now that the peer connection is setup without or without ice servers passed in we can create the offer
         peerConnectionClient.createOffer()
     }
 }

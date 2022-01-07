@@ -5,6 +5,13 @@ plugins {
     id 'kotlin-kapt'
 }
 
+// In order for this project to build you need to add your own apikey.properties file with the information located on your Xirsys dashboard
+// You can create a free account https://global.xirsys.net/dashboard/signup 
+// the file needs to be added in the same directory as your local.properties
+def apiKeyPropertiesFile = rootProject.file("apikey.properties")
+def apiKeyProperties = new Properties()
+apiKeyProperties.load(new FileInputStream(apiKeyPropertiesFile))
+
 android {
     compileSdk 31
 
@@ -16,6 +23,10 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "XIRSYS_IDENT", apiKeyProperties['XIRSYS_IDENT']
+        buildConfigField "String", "XIRSYS_SECRET", apiKeyProperties['XIRSYS_SECRET']
+        buildConfigField "String", "XIRSYS_CHANNEL", apiKeyProperties['XIRSYS_CHANNEL']
     }
 
     buildTypes {
@@ -40,7 +51,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
-    def retrofitVersion = "2.3.0"
+    def retrofitVersion = "2.9.0"
     def coroutineVersion = '1.5.0'
     def nav_version = '2.3.5'
     def lifecycle_version = "2.4.0"
@@ -59,6 +70,8 @@ dependencies {
         exclude group: 'org.json', module: 'json'
     }
     implementation 'com.google.code.gson:gson:2.8.1'
+
+    // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 

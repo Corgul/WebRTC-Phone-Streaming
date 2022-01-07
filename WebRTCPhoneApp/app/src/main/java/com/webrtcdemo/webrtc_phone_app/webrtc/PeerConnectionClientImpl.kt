@@ -37,7 +37,15 @@ class PeerConnectionClientImpl @Inject constructor(
         setupPeerConnectionFactory(eglBase)
     }
 
-    private fun setupPeerConnectionFactory(eglBase: EglBase) {
+    override fun setupPeerConnection(eglBase: EglBase, iceServers: List<PeerConnection.IceServer>?) {
+        if (iceServers == null) {
+            setupPeerConnectionFactory(eglBase)
+            return
+        }
+        setupPeerConnectionFactory(eglBase, iceServers)
+    }
+
+    private fun setupPeerConnectionFactory(eglBase: EglBase, iceServers: List<PeerConnection.IceServer> = listOf()) {
         // Default initialization options for the PeerConnectionFactory
         val initializationOptions = PeerConnectionFactory.InitializationOptions
             .builder(context)
@@ -55,13 +63,12 @@ class PeerConnectionClientImpl @Inject constructor(
             .setVideoDecoderFactory(defaultVideoDecoderFactory)
             .createPeerConnectionFactory()
 
-        setupPeerConnection()
+        setupPeerConnection(iceServers)
     }
 
-    private fun setupPeerConnection() {
-        // TODO - Use xirsys for TURN and STUN Server
-        // No ICE Servers (STUN/TURN) passed in yet, just use the default STUN Servers the library uses
-        val rtcConfig = PeerConnection.RTCConfiguration(listOf())
+    private fun setupPeerConnection(iceServers: List<PeerConnection.IceServer>) {
+        // If an empty list is passed in, just use the default STUN Servers the library uses
+        val rtcConfig = PeerConnection.RTCConfiguration(iceServers)
 
         // Gather ICE Candidates for each media track. If set to "BALANCED" will gather ice candidates for each media type (audio/video)
         rtcConfig.bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE
