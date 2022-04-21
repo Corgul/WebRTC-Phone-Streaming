@@ -9,7 +9,7 @@ To stream:
 2. On the other phone, enter the exact same name of the room to join.
 3. If all other parts of the setup are complete they should both connect successfully, the sender will show it's own camera view and the receiver should show the sender's camera view.
 
-
+![App showcase](https://github.com/Corgul/WebRTC-Phone-Streaming/blob/main/images/app_showcase.png?raw=true)
 
 ## Getting Started
 
@@ -51,6 +51,7 @@ and it should return
 
 We went with Xirsys, a free cloud TURN server platform. You can also go with something like hosting your own CoTURN server on AWS. To get started with Xirsys, make an account [here](https://xirsys.com/). Create a project on there. Next find these parameters on the dashboard and take note of them, we will put them in the Android project.
 
+![Xirsys dashboard](https://github.com/Corgul/WebRTC-Phone-Streaming/blob/main/images/xirsys_dashboard.png?raw=true)
 
 ### Running the app
 
